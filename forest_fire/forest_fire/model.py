@@ -3,7 +3,7 @@ from mesa import Model
 from mesa.datacollection import DataCollector
 from mesa.space import Grid
 from mesa.time import RandomActivation
-
+from datetime import datetime
 from .agent import TreeCell
 
 
@@ -23,7 +23,10 @@ class ForestFire(Model):
         # Set up model objects
         self.schedule = RandomActivation(self)
         self.grid = Grid(width, height, torus=False)
-
+        
+        self.density = density
+        self.humidity = humidity
+        
         # acontece a cada passo
         self.datacollector = DataCollector(
             model_reporters={
@@ -45,7 +48,7 @@ class ForestFire(Model):
         for (contents, x, y) in self.grid.coord_iter():
             if self.random.random() < density:
                 # Create a tree
-                new_tree = TreeCell((x, y), humidity, self)
+                new_tree = TreeCell((x, y), self)
                 # Set all trees in the first column on fire.
                 if x == 0:
                     new_tree.condition = "On Fire"
@@ -67,13 +70,14 @@ class ForestFire(Model):
         # Halt if no more fire
         if self.count_type(self, "On Fire") == 0:
             self.running = False
-            #print(self.datacollector.get_model_vars_dataframe())
+            
+            now = str(datetime.now()).replace(":", "-")
             df = self.datacollector.get_model_vars_dataframe()
-            df.to_csv('model.csv')
+            df.to_csv("model_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
 
             self.datacollector_agent.collect(self)
             df2 = self.datacollector_agent.get_agent_vars_dataframe()
-            df2.to_csv('agent.csv')
+            df2.to_csv("agent_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
         
         
 

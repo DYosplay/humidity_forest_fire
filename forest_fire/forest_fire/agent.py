@@ -16,7 +16,7 @@ class TreeCell(Agent):
     practice to give one to each agent anyway.
     """
 
-    def __init__(self, pos, humidity, model):
+    def __init__(self, pos, model):
         """
         Create a new tree.
         Args:
@@ -26,8 +26,7 @@ class TreeCell(Agent):
         super().__init__(pos, model)
         self.pos = pos
         self.condition = "Fine"
-        self.fire_force = random.uniform(0, 1)
-        self.tree_humidity = humidity + random.uniform(-0.1, 0.1)
+        self.tree_humidity = model.humidity + random.uniform(-0.1, 0.1)
         self.count_steps = -1
 
     def step(self):
@@ -37,7 +36,7 @@ class TreeCell(Agent):
         if self.condition == "On Fire":
             for neighbor in self.model.grid.neighbor_iter(self.pos):
                 # se a arvore vizinha estiver bem e a "forca do fogo" for maior que a humidade da arvore, pega fogo.
-                if neighbor.condition == "Fine" and self.fire_force > neighbor.tree_humidity:
+                if neighbor.condition == "Fine" and random.uniform(0, 1) > neighbor.tree_humidity:
                     neighbor.condition = "On Fire"
                     neighbor.count_steps = self.model.schedule.steps + 1
 
