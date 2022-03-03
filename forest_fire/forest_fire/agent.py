@@ -1,3 +1,4 @@
+from xml.etree.ElementTree import tostring
 from mesa import Agent
 from mesa.datacollection import DataCollector
 import random
@@ -27,7 +28,14 @@ class TreeCell(Agent):
         self.condition = "Fine"
         self.fire_force = random.uniform(0, 1)
         self.three_humidity = humidity + random.uniform(-0.1, 0.1)
-
+        self.count_steps = -1
+        # self.datacollector = DataCollector(
+        #     agent_reporters={
+        #         "Position": self.get_pos,
+        #         "Fire Force": self.get_fire_force,
+        #         "Three Humidity": self.get_three_humidity,
+        #     }
+        # )
         
 
     def step(self):
@@ -39,7 +47,21 @@ class TreeCell(Agent):
                 # se a arvore vizinha estiver bem e a "forca do fogo" for maior que a humidade da arvore, pega fogo.
                 if neighbor.condition == "Fine" and self.fire_force > neighbor.three_humidity:
                     neighbor.condition = "On Fire"
-                    
+                    neighbor.count_steps = self.model.schedule.steps
+                        #print("Oi\nsteps:", self.model.schedule.steps)
             self.condition = "Burned Out"
 
-        
+            #self.datacollector.collect(self)
+
+            #print(self.datacollector.get_agent_vars_dataframe())
+
+
+    # def get_pos(self):
+    #     return self.pos 
+    
+    # def get_fire_force(self):
+    #     return self.fire_force 
+
+    # def get_three_humidity(self):
+    #     return self.three_humidity 
+

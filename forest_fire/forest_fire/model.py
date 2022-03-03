@@ -24,10 +24,14 @@ class ForestFire(Model):
         self.grid = Grid(width, height, torus=False)
 
         self.datacollector = DataCollector(
-            {
+            model_reporters={
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
+            },
+            agent_reporters={
+                "State": lambda x: x.count_steps
+                #"Count": lambda x: 
             }
         )
 
@@ -56,7 +60,14 @@ class ForestFire(Model):
         # Halt if no more fire
         if self.count_type(self, "On Fire") == 0:
             self.running = False
-            print(self.datacollector.get_model_vars_dataframe())
+            #print(self.datacollector.get_model_vars_dataframe())
+            df = self.datacollector.get_model_vars_dataframe()
+            df.to_csv('model.csv')
+
+            df2 = self.datacollector.get_agent_vars_dataframe()
+            df2.to_csv('agent.csv')
+            #print("\n\n")
+            #print(self.datacollector.get_agent_vars_dataframe())
 
         #print(self.datacollector.get_model_vars_dataframe())
         
