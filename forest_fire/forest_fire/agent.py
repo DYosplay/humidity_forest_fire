@@ -27,16 +27,8 @@ class TreeCell(Agent):
         self.pos = pos
         self.condition = "Fine"
         self.fire_force = random.uniform(0, 1)
-        self.three_humidity = humidity + random.uniform(-0.1, 0.1)
+        self.tree_humidity = humidity + random.uniform(-0.1, 0.1)
         self.count_steps = -1
-        # self.datacollector = DataCollector(
-        #     agent_reporters={
-        #         "Position": self.get_pos,
-        #         "Fire Force": self.get_fire_force,
-        #         "Three Humidity": self.get_three_humidity,
-        #     }
-        # )
-        
 
     def step(self):
         """
@@ -45,23 +37,9 @@ class TreeCell(Agent):
         if self.condition == "On Fire":
             for neighbor in self.model.grid.neighbor_iter(self.pos):
                 # se a arvore vizinha estiver bem e a "forca do fogo" for maior que a humidade da arvore, pega fogo.
-                if neighbor.condition == "Fine" and self.fire_force > neighbor.three_humidity:
+                if neighbor.condition == "Fine" and self.fire_force > neighbor.tree_humidity:
                     neighbor.condition = "On Fire"
-                    neighbor.count_steps = self.model.schedule.steps
-                        #print("Oi\nsteps:", self.model.schedule.steps)
+                    neighbor.count_steps = self.model.schedule.steps + 1
+
             self.condition = "Burned Out"
-
-            #self.datacollector.collect(self)
-
-            #print(self.datacollector.get_agent_vars_dataframe())
-
-
-    # def get_pos(self):
-    #     return self.pos 
-    
-    # def get_fire_force(self):
-    #     return self.fire_force 
-
-    # def get_three_humidity(self):
-    #     return self.three_humidity 
 

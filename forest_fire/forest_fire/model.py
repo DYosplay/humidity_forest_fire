@@ -1,3 +1,4 @@
+from hashlib import new
 from mesa import Model
 from mesa.datacollection import DataCollector
 from mesa.space import Grid
@@ -23,14 +24,19 @@ class ForestFire(Model):
         self.schedule = RandomActivation(self)
         self.grid = Grid(width, height, torus=False)
 
+        # acontece a cada passo
         self.datacollector = DataCollector(
             model_reporters={
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
-            },
+            }
+        )
+
+        # acontece ao termino do ultimo passo
+        self.datacollector_agent = DataCollector(
             agent_reporters={
-                "State": lambda x: x.count_steps
+                "Steps to fire up": lambda x: x.count_steps
                 #"Count": lambda x: 
             }
         )
@@ -43,6 +49,7 @@ class ForestFire(Model):
                 # Set all trees in the first column on fire.
                 if x == 0:
                     new_tree.condition = "On Fire"
+                    new_tree.count_steps = 0
                 self.grid._place_agent((x, y), new_tree)
                 self.schedule.add(new_tree)
 
@@ -64,12 +71,9 @@ class ForestFire(Model):
             df = self.datacollector.get_model_vars_dataframe()
             df.to_csv('model.csv')
 
-            df2 = self.datacollector.get_agent_vars_dataframe()
+            self.datacollector_agent.collect(self)
+            df2 = self.datacollector_agent.get_agent_vars_dataframe()
             df2.to_csv('agent.csv')
-            #print("\n\n")
-            #print(self.datacollector.get_agent_vars_dataframe())
-
-        #print(self.datacollector.get_model_vars_dataframe())
         
         
 
