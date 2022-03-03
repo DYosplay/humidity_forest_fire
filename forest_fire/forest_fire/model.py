@@ -5,6 +5,7 @@ from mesa.space import Grid
 from mesa.time import RandomActivation
 from datetime import datetime
 from .agent import TreeCell
+from os import sep
 
 
 class ForestFire(Model):
@@ -73,11 +74,11 @@ class ForestFire(Model):
             
             now = str(datetime.now()).replace(":", "-")
             df = self.datacollector.get_model_vars_dataframe()
-            df.to_csv("model_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
+            df.to_csv("spreadsheet" + sep + "model_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
 
             self.datacollector_agent.collect(self)
             df2 = self.datacollector_agent.get_agent_vars_dataframe()
-            df2.to_csv("agent_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
+            df2.to_csv("spreadsheet" + sep + "agent_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
         
         
 
