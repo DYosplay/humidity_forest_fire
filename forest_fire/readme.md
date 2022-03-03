@@ -5,52 +5,51 @@
 
 # Explicações
 
-# Apresentação do novo modelo
+## Apresentação do novo modelo
+Aqui proponho e implemento uma variação do modelo de incêndio em florestas disponibilizado.
 
-    Aqui proponho e implemento uma variação do modelo de incêndio em florestas disponibilizado.
+A modificação nasce da inserção da variável (manipulável) de humidade do ar e o objetivo é analisar como essa variável interfere no experimento.
 
-    A modificação nasce da inserção da variável (manipulável) de humidade do ar e o objetivo é analisar como essa variável interfere no experimento.
+## Hipótese causal: 
+Quanto maior o nível de humidade do ar, mais difícil é para que um incêndio se espalhe em uma floresta. Da mesma maneira, quanto menor o nível de humidade do ar, mais fácil é para que um incêndio se espalhe em uma floresta.
 
-# Hipótese causal: 
-    Quanto maior o nível de humidade do ar, mais difícil é para que um incêndio se espalhe em uma floresta. Da mesma maneira, quanto menor o nível de humidade do ar, mais fácil é para que um incêndio se espalhe em uma floresta.
+## Justificativa para as mudanças realizadas nos arquivos:
 
-# Justificativa para as mudanças realizadas nos arquivos:
+server.py: 
+1) Adicionado o parâmetro de modelo "humidity" do tipo slider. É isso que permite ao usuário manipular o parâmetro através da interface gráfica.
 
-    server.py: 
-    1) Adicionado o parâmetro de modelo "humidity" do tipo slider. É isso que permite ao usuário manipular o parâmetro através da interface gráfica.
+model.py: 
+1) As variáveis "density" e "humidity" agora são salvas como variáveis do modelo. Isso não interfere na execução do mesmo. Foi adicionado apenas para facilitar o salvamento dos arquivos csv.
 
-    model.py: 
-    1) As variáveis "density" e "humidity" agora são salvas como variáveis do modelo. Isso não interfere na execução do mesmo. Foi adicionado apenas para facilitar o salvamento dos arquivos csv.
+2) Foi criado um novo datacollector onde os dados são coletados após o término do último passo de execução. Esse coletor é responsável por obter informações relativas aos agentes e serve basicamente para determinar quanto tempo (em passos) foi necessário até que uma árvore começasse a pegar fogo.
 
-    2) Foi criado um novo datacollector onde os dados são coletados após o término do último passo de execução. Esse coletor é responsável por obter informações relativas aos agentes e serve basicamente para determinar quanto tempo (em passos) foi necessário até que uma árvore começasse a pegar fogo.
+3) Ao término da execução do último passo, tanto o coletor já existente (que coleta dados a nível de modelo), quanto o coletor criado por mim (que coleta dados a nível de agente) geram seus respectivos arquivos csv. O nome desses arquivos utiliza um carimbo data e hora, bem como explicitam os valores dos parâmetros "humidity" e "density" utilizados.
 
-    3) Ao término da execução do último passo, tanto o coletor já existente (que coleta dados a nível de modelo), quanto o coletor criado por mim (que coleta dados a nível de agente) geram seus respectivos arquivos csv. O nome desses arquivos utiliza um carimbo data e hora, bem como explicitam os valores dos parâmetros "humidity" e "density" utilizados.
+agent.py
+1) Os agentes agora possuem a variável "count_steps", que marca quanto tempo (em passos) foi necessário até que a árvore começasse a pegar fogo. O valor padrão é -1, o que significa que se a árvore nunca pegar fogo, o valor na planilha será -1. 
+Também foi adicionada uma variável auxiliar que altera aleatoriamente o nível da humidade do ar em 10 pontos percentuais para mais ou para menos na região da árvore em questão. Isso serve apenas para inserir um fator mais caótico no experimento e tornar os resultados mais evidentes (fáceis de serem analisados).
 
-    agent.py
-    1) Os agentes agora possuem a variável "count_steps", que marca quanto tempo (em passos) foi necessário até que a árvore começasse a pegar fogo. O valor padrão é -1, o que significa que se a árvore nunca pegar fogo, o valor na planilha será -1. 
-    Também foi adicionada uma variável auxiliar que altera aleatoriamente o nível da humidade do ar em 10 pontos percentuais para mais ou para menos na região da árvore em questão. Isso serve apenas para inserir um fator mais caótico no experimento e tornar os resultados mais evidentes (fáceis de serem analisados).
+2) Agora, para determinar se o fogo se espalha de uma árvore para outra é feita a geração de um número aleatório entre 0 e 1 (inclusos). Se este número for superior a humidade naquela região (deslocada com a variável auxiliar explicada anteriormente) e, além disso, essa árvore que pode pegar fogo estiver com o estado "Fine", o fogo se espalha.
+Caso contrário, isto é, ou o número gerado for menor que a humidade naquela região, ou a árvore não esteja com o estado "Fine", o incêndio não se espalha.
 
-    2) Agora, para determinar se o fogo se espalha de uma árvore para outra é feita a geração de um número aleatório entre 0 e 1 (inclusos). Se este número for superior a humidade naquela região (deslocada com a variável auxiliar explicada anteriormente) e, além disso, essa árvore que pode pegar fogo estiver com o estado "Fine", o fogo se espalha.
-    Caso contrário, isto é, ou o número gerado for menor que a humidade naquela região, ou a árvore não esteja com o estado "Fine", o incêndio não se espalha.
+3) Agora, sempre que uma árvore começa a pegar fogo, o número do passo é salvo na variável do agente "count_steps"
 
-    3) Agora, sempre que uma árvore começa a pegar fogo, o número do passo é salvo na variável do agente "count_steps"
+## Como usar o simulador:
+Apenas defina um valor para a densidade de árvores e para a humidade na floresta a partir dos sliders. Quanto maior a densidade, maior a quantidade de árvores e consequentemente mais próximas elas estarão. Quanto menor a humidade, mais fácil é para um incêncio se alastrar.
 
-# Como usar o simulador:
-    Apenas defina um valor para a densidade de árvores e para a humidade na floresta a partir dos sliders. Quanto maior a densidade, maior a quantidade de árvores e consequentemente mais próximas elas estarão. Quanto menor a humidade, mais fácil é para um incêncio se alastrar.
+## Descrição das variáveis armazenadas nos arquivos .csv
+Existem dois tipos de arquivos csv, um do ponto de vista dos agentes e outro do modelo.
+As árvores representam os agentes e o conjunto de árvores representa o modelo.
 
-# Descrição das variáveis armazenadas nos arquivos .csv
-    Existem dois tipos de arquivos csv, um do ponto de vista dos agentes e outro do modelo.
-    As árvores representam os agentes e o conjunto de árvores representa o modelo.
-    
-    A quantidade de passos necessários até que uma árvore comece a pegar fogo é uma informação do agente, ou seja, individual para cada árvore.
-    
-    A quantidade de árvores em determinada situação (bem, pegando fogo ou queimada) em algum passo em toda a floresta, por sua vez, é uma informação da floresta (e portanto do modelo) e por isso só pode ser obtida a partir de uma análise de todos os agentes que compõem o modelo.
+A quantidade de passos necessários até que uma árvore comece a pegar fogo é uma informação do agente, ou seja, individual para cada árvore.
 
-    model_data: esse arquivo corresponde as variáveis geradas a nível de modelo. Trata-se de um .csv gerado a partir do coletor de dados que já estava pronto no modelo original.
-    Nesse arquivo, a primeira coluna corresponde ao passo da iteração. As colunas seguintes, nomeadas Fine, On Fire e Burned Out, respectivamente, denotam quantas árvores, naquele passo (step), se encontravam naquela situação em toda a floresta.
+A quantidade de árvores em determinada situação (bem, pegando fogo ou queimada) em algum passo em toda a floresta, por sua vez, é uma informação da floresta (e portanto do modelo) e por isso só pode ser obtida a partir de uma análise de todos os agentes que compõem o modelo.
 
-    agent_data: esse arquivo corresponde as variáveis a nível de agente. Trata-se de um csv gerado a partir do coletor de dados que eu implementei.
-    Nesse arquivo, a primeira coluna, com nome "Step", corresponde ao passo da iteração. A segunda coluna corresponde ao Id do agente, que nada mais é que uma tupla com as coordenadas (x, y) da árvore. A última coluna, como nome "Steps to fire up", corresponde ao número de passos que foram necessários para que a árvore em questão começasse a pegar fogo. Caso a árvore nunca tenha pegado fogo, a variável assume o valor -1.
+model_data: esse arquivo corresponde as variáveis geradas a nível de modelo. Trata-se de um .csv gerado a partir do coletor de dados que já estava pronto no modelo original.
+Nesse arquivo, a primeira coluna corresponde ao passo da iteração. As colunas seguintes, nomeadas Fine, On Fire e Burned Out, respectivamente, denotam quantas árvores, naquele passo (step), se encontravam naquela situação em toda a floresta.
+
+agent_data: esse arquivo corresponde as variáveis a nível de agente. Trata-se de um csv gerado a partir do coletor de dados que eu implementei.
+Nesse arquivo, a primeira coluna, com nome "Step", corresponde ao passo da iteração. A segunda coluna corresponde ao Id do agente, que nada mais é que uma tupla com as coordenadas (x, y) da árvore. A última coluna, como nome "Steps to fire up", corresponde ao número de passos que foram necessários para que a árvore em questão começasse a pegar fogo. Caso a árvore nunca tenha pegado fogo, a variável assume o valor -1.
 
 
 
