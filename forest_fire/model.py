@@ -6,7 +6,7 @@ from mesa.time import RandomActivation
 from datetime import datetime
 from .agent import TreeCell
 from os import sep
-
+import sys
 
 class ForestFire(Model):
     """
@@ -27,6 +27,10 @@ class ForestFire(Model):
         
         self.density = density
         self.humidity = humidity
+
+        # variavel auxiliar para a contagem de clusteres
+        #self.n_cluster = 0
+        #sys.setrecursionlimit(10000)
         
         # acontece a cada passo
         self.datacollector = DataCollector(
@@ -34,6 +38,8 @@ class ForestFire(Model):
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
+                "Number of Clusteres": lambda m: self.count_clusteres(m, "Fine")[0],
+                "Avarage Clusteres Size": lambda m: self.count_clusteres(m, "Fine")[1]
             }
         )
 
@@ -41,7 +47,6 @@ class ForestFire(Model):
         self.datacollector_agent = DataCollector(
             agent_reporters={
                 "Steps to fire up": lambda x: x.count_steps
-                #"Count": lambda x: 
             }
         )
 
@@ -92,3 +97,71 @@ class ForestFire(Model):
             if tree.condition == tree_condition:
                 count += 1
         return count
+    
+    @staticmethod
+    def count_clusteres(model, tree_condition):
+        # número de clusteres
+        n_clusteres = 0 
+
+        # dicionario com os tamanhos
+        dictionary = {}
+
+        # itera por cada uma das árvores
+        for tree in model.schedule.agents:
+            # se a arvore nao tiver sido visitada e estiver bem
+            if tree.visited == 0 and tree.condition == tree_condition:
+                # faz a DFS
+                count = ForestFire.depth_first_search(model, n_clusteres, tree, tree_condition)
+                
+                # contabiliza o tamanho dos clusteres
+                if count in dictionary:
+                    dictionary[count] += 1
+                else:
+                    dictionary[count] = 1
+                
+                # incrementa o número de clusters
+                n_clusteres += 1
+        
+        # marca todas as arvores como não visitadas
+        for tree in model.schedule.agents:
+            tree.visited = 0
+        
+        # tamanho medio dos clusteres
+        mean_clusteres = "{:.2f}".format(sum(list(dictionary.keys())) / len(dictionary))
+        # retorna o número de clusteres e o tamanho medio deles
+        return (n_clusteres, mean_clusteres)
+
+    @staticmethod
+    def depth_first_search(model, n_clusteres, tree, tree_condition):
+        # define uma pilha
+        tree_stack = []
+        count = 0
+        # coloca a arvore na pilha
+        tree_stack.append(tree)
+
+        # enquanto a pilha não estiver vazia
+        while tree_stack != []:
+            v = tree_stack.pop()
+
+            # se essa arvore nao tiver sido visitada e estiver na condição solicitada
+            if v.visited == 0 and v.condition == tree_condition:
+                count+=1
+                # marca essa arvore como visitada
+                v.visited = n_clusteres + 1
+                
+                # para cada vizinha dessa arvore
+                for neighbor in v.model.grid.neighbor_iter(v.pos):
+                    tree_stack.append(neighbor)
+
+        return count
+            
+
+    # def depth_first_search(model, n_clusteres, tree, tree_condition):
+    #     tree.visited = n_clusteres + 1
+    #     # para cada vizinha dessa arvore
+    #     for neighbor in tree.model.grid.neighbor_iter(tree.pos):
+    #         # se essa arvore vizinha nao tiver sido visitada e estiver bem
+    #         if neighbor.visited == 0 and neighbor.condition == tree_condition:
+    #             ForestFire.depth_first_search(model, n_clusteres, neighbor, tree_condition)
+
+

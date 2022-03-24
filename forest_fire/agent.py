@@ -29,6 +29,9 @@ class TreeCell(Agent):
         self.tree_humidity = model.humidity + random.uniform(-0.1, 0.1)
         self.count_steps = -1
 
+        # variavel auxiliar para a contagem dos clusteres
+        self.visited = 0
+
     def step(self):
         """
         If the tree is on fire, spread it to fine trees nearby.

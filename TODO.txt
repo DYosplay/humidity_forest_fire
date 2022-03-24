@@ -1,0 +1,18 @@
+7.1.1
+Antigo
+1. Sim (humidade)
+2. Sim (humidade)
+3. Sim (o antigo)
+4. Sim 
+
+Novo
+1. Sim (antiga)
+2. Não
+3. Não, depende de 2
+4. Não (Loopy)
+5. Não (documentar as variáveis)
+6. Não sei. Verificar quais variáveis aparecem nas planilhas.
+7. Não, justificar a quantidade de passos (sem controle pois o número de árvores é finito)
+8. Não entendi.
+
+7.1.1.1: Atualizar o readme
