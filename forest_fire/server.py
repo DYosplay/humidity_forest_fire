@@ -5,7 +5,8 @@ from mesa.visualization.UserParam import UserSettableParameter
 from .model import ForestFire
 
 COLORS = {"Fine": "#00AA00", "On Fire": "#880000", "Burned Out": "#000000"}
-
+AV_CLUSTERES = {"Av. Fine Clusteres Size": "#00AA00", "Av. Burned Out Clusteres Size": "#000000"}
+N_CLUSTERES = {"# Fine Clusteres": "#00AA00", "# Burned Out Clusteres": "#000000"}
 
 def forest_fire_portrayal(tree):
     if tree is None:
@@ -22,6 +23,16 @@ canvas_element = CanvasGrid(forest_fire_portrayal, 100, 100, 500, 500)
 tree_chart = ChartModule(
     [{"Label": label, "Color": color} for (label, color) in COLORS.items()]
 )
+
+clusteres_chart = ChartModule(
+    [{"Label": label, "Color": color} for (label, color) in AV_CLUSTERES.items()]
+)
+
+n_clusteres_chart = ChartModule(
+    [{"Label": label, "Color": color} for (label, color) in N_CLUSTERES.items()]
+)
+
+
 pie_chart = PieChartModule(
     [{"Label": label, "Color": color} for (label, color) in COLORS.items()]
 )
@@ -33,5 +44,5 @@ model_params = {
     "humidity": UserSettableParameter("slider", "Air humidity", 0.6, 0.1, 1.0, 0.01),
 }
 server = ModularServer(
-    ForestFire, [canvas_element, tree_chart, pie_chart], "Forest Fire", model_params
+    ForestFire, [canvas_element, tree_chart, clusteres_chart, n_clusteres_chart, pie_chart], "Forest Fire", model_params
 )

@@ -38,8 +38,10 @@ class ForestFire(Model):
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
-                "Number of Clusteres": lambda m: self.count_clusteres(m, "Fine")[0],
-                "Avarage Clusteres Size": lambda m: self.count_clusteres(m, "Fine")[1]
+                "# Fine Clusteres": lambda m: self.count_clusteres(m, "Fine")[0],
+                "Av. Fine Clusteres Size": lambda m: self.count_clusteres(m, "Fine")[1],
+                "# Burned Out Clusteres": lambda m: self.count_clusteres(m, "Burned Out")[0],
+                "Av. Burned Out Clusteres Size": lambda m: self.count_clusteres(m, "Burned Out")[1]
             }
         )
 
@@ -127,7 +129,11 @@ class ForestFire(Model):
             tree.visited = 0
         
         # tamanho medio dos clusteres
-        mean_clusteres = "{:.2f}".format(sum(list(dictionary.keys())) / len(dictionary))
+        if(len(dictionary) > 0):
+            numerator = [i*dictionary [i] for i in dictionary]
+            mean_clusteres = "{:.2f}".format(sum(numerator) / sum(list(dictionary.values())))
+        else:
+            mean_clusteres = 0
         # retorna o número de clusteres e o tamanho medio deles
         return (n_clusteres, mean_clusteres)
 
