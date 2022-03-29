@@ -27,14 +27,14 @@ class ForestFire(Model):
         
         self.density = density
         self.humidity = humidity
-
-        # variavel auxiliar para a contagem de clusteres
-        #self.n_cluster = 0
-        #sys.setrecursionlimit(10000)
         
         # acontece a cada passo
         self.datacollector = DataCollector(
             model_reporters={
+                "Width": lambda x: width,
+                "Height": lambda x: height,
+                "Density": lambda x: self.density,
+                "Humidity ": lambda x: self.humidity,    
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
@@ -48,6 +48,10 @@ class ForestFire(Model):
         # acontece ao termino do ultimo passo
         self.datacollector_agent = DataCollector(
             agent_reporters={
+                "Width": lambda x: width,
+                "Height": lambda x: height,
+                "Density": lambda x: self.density,
+                "Humidity ": lambda x: self.humidity,
                 "Steps to fire up": lambda x: x.count_steps
             }
         )
@@ -79,13 +83,16 @@ class ForestFire(Model):
         if self.count_type(self, "On Fire") == 0:
             self.running = False
             
-            now = str(datetime.now()).replace(":", "-")
-            df = self.datacollector.get_model_vars_dataframe()
-            df.to_csv("spreadsheet" + sep + "model_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
 
-            self.datacollector_agent.collect(self)
-            df2 = self.datacollector_agent.get_agent_vars_dataframe()
-            df2.to_csv("spreadsheet" + sep + "agent_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
+            ###### DESCOMENTAR SE NÃO FOR BATCH RUN
+            # now = str(datetime.now()).replace(":", "-")
+            # df = self.datacollector.get_model_vars_dataframe()
+            # #df.columns.values[0] = "Step"
+            # df.to_csv("spreadsheet" + sep + "model_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
+
+            # self.datacollector_agent.collect(self)
+            # df2 = self.datacollector_agent.get_agent_vars_dataframe()
+            # df2.to_csv("spreadsheet" + sep + "agent_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
         
         
 
@@ -131,7 +138,7 @@ class ForestFire(Model):
         # tamanho medio dos clusteres
         if(len(dictionary) > 0):
             numerator = [i*dictionary [i] for i in dictionary]
-            mean_clusteres = "{:.2f}".format(sum(numerator) / sum(list(dictionary.values())))
+            mean_clusteres = "{:.1f}".format(sum(numerator) / sum(list(dictionary.values())))
         else:
             mean_clusteres = 0
         # retorna o número de clusteres e o tamanho medio deles

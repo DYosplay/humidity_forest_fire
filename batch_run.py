@@ -6,17 +6,49 @@ from mesa.space import Grid
 from mesa.datacollection import DataCollector
 from mesa.batchrunner import BatchRunner
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import numpy as np
+import os
 
-fixed_params = dict(height=50, width=50)  # Height and width are constant
-# Vary density from 0.01 to 1, in 0.01 increments:
-variable_params = dict(density=np.linspace(0, 1, 11)[1:], humidity=np.linspace(0.1, 1, 11)[1:])
+'''
+Variáveis de controle: 
+# height = altura do grid e width = largura do grid
+'''
+fixed_params = dict(height=100, width=100)  # Height and width are constant
 
-# At the end of each model run, calculate the fraction of trees which are Burned Out
+'''
+Variáveis independentes:
+# density (densidade) que diz respeito a quantidade de árvores presentes na floresta
+# humidity (humidade) que diz respeito a humidade média do ar na floresta
+'''
+
+# Se for uma execução de batch normal (em que ambas variáveis independentes variam), descomentar as duas linhas abaixo e comentar as duas linhas seguintes.
+# Ambas variam de 0.1 até 1 em passos de 0.1
+# variable_params = dict(density=np.linspace(0, 1, 11)[1:], humidity=np.linspace(0.1, 1, 11)[1:])
+
+# Se for uma execução da mesma simulação várias vezes (para identificar se os resultados seguem uma distribuição aproximadamente normal)
+n_simulations = 500
+variable_params = dict(density=[0.54] * n_simulations, humidity=[0.32])
+
+'''
+Variáveis dependentes:
+# Fine: que corresponde ao número de árvores não queimadas ao término da execução
+# BurnedOut: que corresponde ao número de árvores queimadas ao término da execução 
+# NumberFineClusteres: que corresponde ao número de clusteres de árvores não queimadas ao término da execução
+# AvFineClusteresSize: que corresponde ao tamanho médio dos clusteres de árvores não queimadas ao término da execução
+# NumberBurnedOutClusteres: que corresponde ao número de clusteres de árvores queimadas ao término da execução
+# AvBurnedOutClusteresSize: que corresponde ao tamanho médio dos clusteres de árvores queimadas ao término da execução
+# Além disso, existe a variável dependente 'On Fire' (comentada nessa model reporter) que corresponde ao número de árvores queimando. Porém, como a simulação só acaba quando não existem mais árvores queimando, ao término da execução (que é quando ocorre a medição desse model reporter) esse número é necessariamente 0, visto que a condição de parada do modelo é justamente não haver mais árvores queimando e o número de árvores ser finito.
+'''
+
 model_reporter = {
-    "BurnedOut": lambda m: (
-        model.ForestFire.count_type(m, "Burned Out") / m.schedule.get_agent_count()
-    )
+    "Fine":  lambda m: model.ForestFire.count_type(m, "Fine"),
+    # "On Fire":  lambda m: model.ForestFire.count_type(m, "On Fire"),
+    "BurnedOut":  lambda m: model.ForestFire.count_type(m, "Burned Out"),
+    "NumberFineClusteres": lambda m:  model.ForestFire.count_clusteres(m, "Fine")[0],
+    "AvFineClusteresSize": lambda m:  model.ForestFire.count_clusteres(m, "Fine")[1],
+    "NumberBurnedOutClusteres": lambda m:  model.ForestFire.count_clusteres(m, "Burned Out")[0],
+    "AvBurnedOutClusteresSize": lambda m:  model.ForestFire.count_clusteres(m, "Burned Out")[1]
 }
 
 # Create the batch runner
@@ -29,6 +61,37 @@ param_run = BatchRunner(
 
 param_run.run_all()
 df = param_run.get_model_vars_dataframe()
-plt.scatter(df.density, df.BurnedOut)
-plt.xlim(0, 1)
-plt.show()
+
+#plt.hist(df.Fine, edgecolor='black', bins=20)
+#plt.xticks(range(1,3)) # para plotagem de 1 até 3, pode ser util pra plotar ate 10000
+
+
+plt.clf()
+plt.hist(df.Fine, edgecolor='black', bins=40)
+plt.savefig("images" + os.sep + "Fine.png")
+
+plt.clf()
+plt.hist(df.BurnedOut, edgecolor='black', bins=40)
+plt.savefig("images" + os.sep + "BurnedOut.png")
+
+plt.clf()
+plt.hist(df.NumberFineClusteres, edgecolor='black', bins=40)
+plt.savefig("images" + os.sep + "NumberFineClusteres.png")
+
+plt.clf()
+df['AvFineClusteresSize'] = df['AvFineClusteresSize'].astype(float)
+plt.hist(df.AvFineClusteresSize, edgecolor='black', bins=60)
+plt.savefig("images" + os.sep + "AvFineClusteresSize.png")
+
+plt.clf()
+plt.hist(df.NumberBurnedOutClusteres, edgecolor='black', bins=40)
+plt.savefig("images" + os.sep + "NumberBurnedOutClusteres.png")
+
+plt.clf()
+#plt.xticks(range(0,10000))
+df['AvBurnedOutClusteresSize'] = df['AvBurnedOutClusteresSize'].astype(float)
+plt.hist(df.AvBurnedOutClusteresSize, edgecolor='black', bins=60)
+plt.savefig("images" + os.sep + "AvBurnedOutClusteresSize.png")
+
+# plt.savefig("plot.png")
+# plt.show()
