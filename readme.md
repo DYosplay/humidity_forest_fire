@@ -11,7 +11,11 @@ Aqui proponho e implemento uma variação do modelo de incêndio em florestas di
 A modificação nasce da inserção da variável (manipulável) de humidade do ar e o objetivo é analisar como essa variável interfere no experimento.
 
 ## Hipótese causal: 
-Quanto maior o nível de humidade do ar, mais difícil é para que um incêndio se espalhe em uma floresta. Da mesma maneira, quanto menor o nível de humidade do ar, mais fácil é para que um incêndio se espalhe em uma floresta.
+Quanto maior for a umidade do ar em uma floresta, mais difícil é para que um incêndio se alastre nessa floresta. Da mesma forma, quanto menor a umidade do ar nessa floresta, mais fácil é para que um incêndio se alastre nessa floresta.
+
+Além disso, Quanto mais densa for uma floresta, mais fácil é para que um incêndio se alastre nessa floresta. Da mesma forma, quanto menos densa for uma floresta, mais difícil é para que um incêndio se alastre nessa floresta.
+
+Quanto menos um incêndio se alastra, maior é o número de árvores sadias e tamanho de bolsões de árvores saudáveis ao término do incêndio. Da mesma forma, quanto mais um incêndio se alastra, menor é o número de árvores sadias e tamanho de bolsões de árvores saudáveis ao término do incêndio
 
 ## Justificativa para as mudanças realizadas nos arquivos:
 
@@ -25,6 +29,8 @@ model.py:
 
 3) Ao término da execução do último passo, tanto o coletor já existente (que coleta dados a nível de modelo), quanto o coletor criado por mim (que coleta dados a nível de agente) geram seus respectivos arquivos csv. O nome desses arquivos utiliza um carimbo data e hora, bem como explicitam os valores dos parâmetros "humidity" e "density" utilizados.
 
+4) Adicionado o método estático que realiza a contagem de bolsões e identifica o tamanho médio deles. Além disso, também foi implementado um algoritmo de busca em profundidade iterativo para auxiliar no processo de identificação dos bolsões.
+
 agent.py
 1) Os agentes agora possuem a variável "count_steps", que marca quanto tempo (em passos) foi necessário até que a árvore começasse a pegar fogo. O valor padrão é -1, o que significa que se a árvore nunca pegar fogo, o valor na planilha será -1. 
 Também foi adicionada uma variável auxiliar que altera aleatoriamente o nível da humidade do ar em 10 pontos percentuais para mais ou para menos na região da árvore em questão. Isso serve apenas para inserir um fator mais caótico no experimento e tornar os resultados mais evidentes (fáceis de serem analisados).
@@ -34,22 +40,42 @@ Caso contrário, isto é, ou o número gerado for menor que a humidade naquela r
 
 3) Agora, sempre que uma árvore começa a pegar fogo, o número do passo é salvo na variável do agente "count_steps"
 
+4) Os agentes possuem uma variável auxiliar que identifica se eles já foram visitados na etapa de identificação dos bolsões.
+
 ## Como usar o simulador:
 Apenas defina um valor para a densidade de árvores e para a humidade na floresta a partir dos sliders. Quanto maior a densidade, maior a quantidade de árvores e consequentemente mais próximas elas estarão. Quanto menor a humidade, mais fácil é para um incêncio se alastrar.
 
+Caso queira utilizar a simulação em lotes basta alterar as listas das variáveis density_list e humidity_list com seus respectivos valores de densidade e umidade.
+
 ## Descrição das variáveis armazenadas nos arquivos .csv
-Existem dois tipos de arquivos csv, um do ponto de vista dos agentes e outro do modelo.
-As árvores representam os agentes e o conjunto de árvores representa o modelo.
+Arquvo de modelos:
+(model_data: esse arquivo corresponde as variáveis geradas a nível de modelo. Trata-se de um .csv gerado a partir do coletor de dados que já estava pronto no modelo original.)
+Step: determina o passo de quando o dado referente ao modelo foi coletado.
+Width: determina a largura da floresta.
+Height: determina a altura da floresta.
+Density: determina a densidade das árvores da floresta.
+Humidity: determina a umidade média do ar da floresta.
+Fine: determina o número de árvores saudáveis naquele passo.
+On Fire: determina o número de árvores pegando fogo naquele passo.
+Burned Out: determina o número de árvores queimadas naquele passo.
+#Fine Clusteres: determina o número de bolsões de árvores saudáveis naquele passo.
+Av. Fine Clusteres Size: determina o tamanho médio dos bolsões de árvores saudáveis naquele passo.
+#Burned Out Clusteres: determina o número de bolsões de árvores queimadas naquele passo.
+Av. Burned Out Clusteres Size: determina o tamanho médio dos bolsões de árvores queimadas naquele passo.
 
-A quantidade de passos necessários até que uma árvore comece a pegar fogo é uma informação do agente, ou seja, individual para cada árvore.
+Arquivo de agentes:
+(agent_data: esse arquivo corresponde as variáveis a nível de agente. Trata-se de um csv gerado a partir do coletor de dados que eu implementei.)
+Step: determina o passo de quando o dado referente ao agente foi coletado.
+AgentID: determina a posição do agente. É uma tupla que representa a coordenada (x,y) do agente.
+Width: determina a largura da floresta cuja qual o agente faz parte.
+Height: determina a altura da floresta cuja qual o agente faz parte.
+Density: determina a densidade das árvores da floresta cuja qual o agente faz parte.
+Humidity: determina a umidade média do ar da floresta cuja qual o agente faz parte no momento da coleta.
+Steps to fire up: determina quantos tempo (medido em passos) foram necessários para que a árvore pegasse fogo. Caso a árvore nunca tenha pegado fogo vale -1.
 
-A quantidade de árvores em determinada situação (bem, pegando fogo ou queimada) em algum passo em toda a floresta, por sua vez, é uma informação da floresta (e portanto do modelo) e por isso só pode ser obtida a partir de uma análise de todos os agentes que compõem o modelo.
 
-model_data: esse arquivo corresponde as variáveis geradas a nível de modelo. Trata-se de um .csv gerado a partir do coletor de dados que já estava pronto no modelo original.
-Nesse arquivo, a primeira coluna corresponde ao passo da iteração. As colunas seguintes, nomeadas Fine, On Fire e Burned Out, respectivamente, denotam quantas árvores, naquele passo (step), se encontravam naquela situação em toda a floresta.
 
-agent_data: esse arquivo corresponde as variáveis a nível de agente. Trata-se de um csv gerado a partir do coletor de dados que eu implementei.
-Nesse arquivo, a primeira coluna, com nome "Step", corresponde ao passo da iteração. A segunda coluna corresponde ao Id do agente, que nada mais é que uma tupla com as coordenadas (x, y) da árvore. A última coluna, como nome "Steps to fire up", corresponde ao número de passos que foram necessários para que a árvore em questão começasse a pegar fogo. Caso a árvore nunca tenha pegado fogo, a variável assume o valor -1.
+
 
 
 

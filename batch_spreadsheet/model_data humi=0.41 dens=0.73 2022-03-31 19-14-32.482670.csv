@@ -1,6 +1,0 @@
-,density,humidity,Run,AvBurnedOutClusteresSize,AvFineClusteresSize,BurnedOut,Fine,NumberBurnedOutClusteres,NumberFineClusteres,height,width
-0,0.73,0.41,0,7154.0,1.6,7154,152,1,96,100,100
-1,0.73,0.41,1,7143.0,1.7,7143,149,1,90,100,100
-2,0.73,0.41,2,2387.3,1.6,7162,154,3,98,100,100
-3,0.73,0.41,3,7127.0,1.8,7127,172,1,98,100,100
-4,0.73,0.41,4,7108.0,1.7,7108,191,1,115,100,100
