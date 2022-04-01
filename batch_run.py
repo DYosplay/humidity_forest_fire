@@ -8,6 +8,7 @@ from mesa.batchrunner import BatchRunner
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import numpy as np
+from datetime import datetime
 import os
 
 '''
@@ -27,8 +28,10 @@ Variáveis independentes:
 # variable_params = dict(density=np.linspace(0, 1, 11)[1:], humidity=np.linspace(0.1, 1, 11)[1:])
 
 # Se for uma execução da mesma simulação várias vezes (para identificar se os resultados seguem uma distribuição aproximadamente normal)
-n_simulations = 500
-variable_params = dict(density=[0.54] * n_simulations, humidity=[0.32])
+n_simulations = 300
+density_list = [0.55] * n_simulations
+humidity_list = [0.32]
+variable_params = dict(density= density_list, humidity=humidity_list)
 
 '''
 Variáveis dependentes:
@@ -60,11 +63,25 @@ param_run = BatchRunner(
 )
 
 param_run.run_all()
+
 df = param_run.get_model_vars_dataframe()
+now = str(datetime.now()).replace(":", "-")
+#df.columns.values[0] = "Step"
 
-#plt.hist(df.Fine, edgecolor='black', bins=20)
-#plt.xticks(range(1,3)) # para plotagem de 1 até 3, pode ser util pra plotar ate 10000
+if not os.path.exists('batch_spreadsheet'):
+    os.mkdir('batch_spreadsheet')
 
+if not os.path.exists('images'):
+    os.mkdir('images')
+
+#df.to_pickle("batch_spreadsheet" + os.sep + "model_data humi=" + str(humidity_list[0]) + " dens=" + str(density_list[0]) + " " + now + ".csv")
+
+df.to_csv("batch_spreadsheet" + os.sep + "model_data humi=" + str(humidity_list[0]) + " dens=" + str(density_list[0]) + " " + now + ".csv")
+
+
+
+# #plt.hist(df.Fine, edgecolor='black', bins=20)
+# #plt.xticks(range(1,3)) # para plotagem de 1 até 3, pode ser util pra plotar ate 10000
 
 plt.clf()
 plt.hist(df.Fine, edgecolor='black', bins=40)
@@ -93,5 +110,16 @@ df['AvBurnedOutClusteresSize'] = df['AvBurnedOutClusteresSize'].astype(float)
 plt.hist(df.AvBurnedOutClusteresSize, edgecolor='black', bins=60)
 plt.savefig("images" + os.sep + "AvBurnedOutClusteresSize.png")
 
-# plt.savefig("plot.png")
-# plt.show()
+text = ""
+text += "AvFineClusteresSize: Mean:" + str(df['AvFineClusteresSize'].mean()) + ", Std: " + str(df['AvFineClusteresSize'].std()) + '\n'
+text += "Fine: Mean:" + str(df['Fine'].mean()) + ", Std: " + str(df['Fine'].std()) + '\n'
+text += "BurnedOut: Mean:" + str(df['BurnedOut'].mean()) + ", Std: " + str(df['BurnedOut'].std()) + '\n'
+text += "NumberFineClusteres: Mean:" + str(df['NumberFineClusteres'].mean()) + ", Std: " + str(df['NumberFineClusteres'].std()) + '\n'
+text += "NumberBurnedOutClusteres: Mean:" + str(df['NumberBurnedOutClusteres'].mean()) + ", Std: " + str(df['NumberBurnedOutClusteres'].std()) + '\n'
+text += "AvBurnedOutClusteresSize: Mean:" + str(df['AvBurnedOutClusteresSize'].mean()) + ", Std: " + str(df['AvBurnedOutClusteresSize'].std()) + '\n'
+
+txt_file = open("Metrics model_data humi=" + str(humidity_list[0]) + " dens=" + str(density_list[0]) + " " + now + ".txt", 'w')
+txt_file.write(text)
+
+# # plt.savefig("plot.png")
+# # plt.show()

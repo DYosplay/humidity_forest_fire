@@ -9,7 +9,7 @@ Novo
 1. Sim (antiga)
 2. Sim (os clusteres)
 3. Sim (gráficos da média do tamanho dos clusteres e o número de clusteres)
-4. Sim (Loopy) (Tenho que refazer)
+4. Sim (Loopy) 
 5. Sim
 6. Sim
 7. Não (README), justificar a quantidade de passos (sem controle pois o número de árvores é finito)

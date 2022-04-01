@@ -6,6 +6,7 @@ from mesa.time import RandomActivation
 from datetime import datetime
 from .agent import TreeCell
 from os import sep
+import os
 import sys
 
 class ForestFire(Model):
@@ -85,14 +86,17 @@ class ForestFire(Model):
             
 
             ###### DESCOMENTAR SE NÃO FOR BATCH RUN
-            # now = str(datetime.now()).replace(":", "-")
-            # df = self.datacollector.get_model_vars_dataframe()
-            # #df.columns.values[0] = "Step"
-            # df.to_csv("spreadsheet" + sep + "model_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
+            if not os.path.exists("spreadsheet"):
+                os.mkdir("spreadsheet")
 
-            # self.datacollector_agent.collect(self)
-            # df2 = self.datacollector_agent.get_agent_vars_dataframe()
-            # df2.to_csv("spreadsheet" + sep + "agent_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
+            now = str(datetime.now()).replace(":", "-")
+            df = self.datacollector.get_model_vars_dataframe()
+            #df.columns.values[0] = "Step"
+            df.to_csv("spreadsheet" + sep + "model_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
+
+            self.datacollector_agent.collect(self)
+            df2 = self.datacollector_agent.get_agent_vars_dataframe()
+            df2.to_csv("spreadsheet" + sep + "agent_data humi=" + str(self.humidity) + " dens=" + str(self.density) + " " + now + ".csv")
         
         
 
